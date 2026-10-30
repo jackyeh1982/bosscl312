@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統跳轉中... | Portal Redirect</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 圖標 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            cyan: '#00f3ff',
+                            magenta: '#ff0055',
+                            purple: '#b026ff',
+                            dark: '#080811'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { filter: 'drop-shadow(0 0 5px rgba(0, 243, 255, 0.6))' },
+                            '100%': { filter: 'drop-shadow(0 0 20px rgba(0, 243, 255, 1))' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 背景網格與粒子效果 */
+        .cyber-bg {
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(176, 38, 255, 0.15) 0%, transparent 60%),
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        /* 環形進度條樣式 */
+        .circle-svg {
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 8;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke: url(#cyan-purple-gradient);
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        /* 玻璃擬態效果 */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                        0 0 30px rgba(0, 243, 255, 0.1);
+        }
+
+        /* 霓虹邊框與文字特效 */
+        .neon-text-cyan {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7), 0 0 20px rgba(0, 243, 255, 0.4);
+        }
+        
+        .neon-text-magenta {
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.7), 0 0 20px rgba(255, 0, 85, 0.4);
+        }
+
+        /* Canvas 背景繪製 */
+        #particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden font-sans cyber-bg">
+
+    <!-- 背景動態粒子 Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- 裝飾性光輝背景球體 -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyber-cyan/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse-slow"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyber-purple/15 rounded-full filter blur-[120px] pointer-events-none animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+
+    <!-- 主要內容卡片 -->
+    <main class="relative z-10 w-full max-w-lg glass-panel rounded-3xl p-6 sm:p-10 text-center transition-all duration-300">
+        
+        <!-- 頂部狀態標籤 -->
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 mb-6 shadow-inner">
+            <span class="relative flex h-2.5 w-2.5">
+                <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-cyan opacity-75"></span>
+                <span id="statusDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyber-cyan"></span>
+            </span>
+            <span id="statusText" class="text-xs font-semibold tracking-wider uppercase text-slate-300 font-orbitron">SYSTEM REDIRECTING</span>
+        </div>
+
+        <!-- 標題 -->
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 text-white font-orbitron">
+            正在傳送至目標頁面
+        </h1>
+        <p class="text-slate-400 text-sm mb-8">系統正在建立安全連線，請稍候...</p>
+
+        <!-- 倒數計時核心 (環形進度條) -->
+        <div class="relative w-48 h-48 mx-auto mb-8 flex items-center justify-center">
+            <!-- 外部旋轉裝飾環 -->
+            <div class="absolute inset-0 rounded-full border border-dashed border-cyber-cyan/30 animate-spin-slow"></div>
+            
+            <!-- SVG 環形進度圖 -->
+            <svg class="w-full h-full circle-svg" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="cyan-purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f3ff" />
+                        <stop offset="100%" stop-color="#b026ff" />
+                    </linearGradient>
+                </defs>
+                <circle class="circle-bg" cx="50" cy="50" r="42"></circle>
+                <circle id="circleProgress" class="circle-progress" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="0"></circle>
+            </svg>
+
+            <!-- 中央數字與單位 -->
+            <div class="absolute flex flex-col items-center justify-center">
+                <span id="countdownNumber" class="text-5xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-white neon-text-cyan">
+                    5
+                </span>
+                <span class="text-xs text-slate-400 font-orbitron uppercase tracking-widest mt-1">Seconds</span>
+            </div>
+        </div>
+
+        <!-- 目標網址預覽卡片 -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 mb-8 text-left relative overflow-hidden group">
+            <div class="text-xs text-slate-500 font-orbitron mb-1 flex justify-between items-center">
+                <span>DESTINATION URL</span>
+                <i class="fa-solid fa-lock text-emerald-400/80 text-[10px]"></i>
+            </div>
+            <div id="targetUrlText" class="text-sm font-mono text-cyber-cyan truncate pr-6 font-medium">
+                Switch 固件升級與刷機教學指南
+            </div>
+            <!-- 裝飾線條 -->
+            <div class="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-cyber-cyan via-cyber-purple to-transparent w-full opacity-50"></div>
+        </div>
+
+        <!-- 控制按鈕組 -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <!-- 立即跳轉按鈕 -->
+            <button id="redirectNowBtn" class="flex-1 py-3.5 px-6 rounded-xl font-orbitron font-bold text-sm text-slate-950 bg-gradient-to-r from-cyber-cyan to-teal-400 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-cyber-cyan/25 flex items-center justify-center gap-2">
+                <span>立即前往</span>
+                <i class="fa-solid fa-bolt"></i>
+            </button>
+            
+            <!-- 暫停 / 繼續按鈕 -->
+            <button id="pauseBtn" class="py-3.5 px-5 rounded-xl font-orbitron font-semibold text-sm bg-slate-800/80 text-slate-300 border border-slate-700/80 hover:bg-slate-700/80 hover:text-white active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <i id="pauseIcon" class="fa-solid fa-pause"></i>
+                <span id="pauseText">暫停</span>
+            </button>
+        </div>
+
+        <!-- 自訂網址展開開關 -->
+        <button id="toggleConfigBtn" class="mt-6 text-xs text-slate-500 hover:text-slate-300 font-orbitron flex items-center justify-center gap-1.5 mx-auto transition-colors">
+            <i class="fa-solid fa-gear"></i>
+            <span>設定目標網址</span>
+        </button>
+
+        <!-- 自訂網址面板 (預設隱藏) -->
+        <div id="configPanel" class="hidden mt-4 pt-4 border-t border-slate-800 text-left transition-all">
+            <label for="customUrlInput" class="block text-xs font-orbitron text-slate-400 mb-2">修改網址 (按下 Enter 或點擊更新):</label>
+            <div class="flex gap-2">
+                <input type="url" id="customUrlInput" placeholder="https://example.com" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyber-cyan transition-colors">
+                <button id="updateUrlBtn" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-orbitron rounded-lg transition-colors text-slate-200">
+                    更新
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 頁尾宣告 -->
+    <footer class="absolute bottom-4 text-center text-xs text-slate-600 font-orbitron z-10">
+        SECURE GATEWAY &copy; 2026 AUTOMATIC REDIRECT SYSTEM
+    </footer>
+
+    <!-- 主要運作邏輯 Script -->
+    <script>
+        // --- 設定參數 ---
+        let targetUrl = "https://jackyeh1982.github.io/Tan-Tan-travel-diary/Switch%E4%BA%94%E6%9C%88/switch.html"; // 預設轉址目標
+        let totalSeconds = 5;                  // 總倒數秒數
+        let remainingTime = totalSeconds;     // 剩餘時間 (以秒為單位，支援小數)
+        let isPaused = false;
+        let timerInterval = null;
+
+        // SVG 環形參數
+        const circleRadius = 42;
+        const circleCircumference = 2 * Math.PI * circleRadius; // 約 263.89
+
+        // --- DOM 元素 ---
+        const countdownNumber = document.getElementById('countdownNumber');
+        const circleProgress = document.getElementById('circleProgress');
+        const targetUrlText = document.getElementById('targetUrlText');
+        const redirectNowBtn = document.getElementById('redirectNowBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const pauseText = document.getElementById('pauseText');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const statusPing = document.getElementById('statusPing');
+        const toggleConfigBtn = document.getElementById('toggleConfigBtn');
+        const configPanel = document.getElementById('configPanel');
+        const customUrlInput = document.getElementById('customUrlInput');
+        const updateUrlBtn = document.getElementById('updateUrlBtn');
+
+        // --- 初始化頁面 ---
+        function init() {
+            // 初始化 SVG 圓環
+            circleProgress.style.strokeDasharray = `${circleCircumference} ${circleCircumference}`;
+            updateTargetUrlDisplay(targetUrl);
+            startCountdown();
+        }
+
+        // 更新目標網址顯示
+        function updateTargetUrlDisplay(url) {
+            targetUrl = url;
+            targetUrlText.textContent = url;
+            customUrlInput.value = url;
+        }
+
+        // --- 倒數計時邏輯 ---
+        function startCountdown() {
+            const updateInterval = 50; // 每 50ms 更新一次，讓動畫極度順暢
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (isPaused) return;
+
+                remainingTime -= updateInterval / 1000;
+
+                if (remainingTime <= 0) {
+                    remainingTime = 0;
+                    clearInterval(timerInterval);
+                    executeRedirect();
+                }
+
+                updateUI();
+            }, updateInterval);
+        }
+
+        // 更新 UI 介面狀態
+        function updateUI() {
+            // 更新數字 (向上取整顯示秒數)
+            const displaySeconds = Math.ceil(remainingTime);
+            countdownNumber.textContent = displaySeconds;
+
+            // 更新環形進度條 (0 到 1 的比例)
+            const progressRatio = remainingTime / totalSeconds;
+            const offset = circleCircumference - (progressRatio * circleCircumference);
+            circleProgress.style.strokeDashoffset = offset;
+        }
+
+        // 執行跳轉
+        function executeRedirect() {
+            statusText.textContent = "REDIRECTING NOW...";
+            statusText.classList.add("text-cyber-cyan");
+            
+            // 跳轉動畫/視覺反饋
+            document.querySelector('main').classList.add('scale-95', 'opacity-80');
+            
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 300);
+        }
+
+        // --- 事件監聽 ---
+
+        // 1. 立即跳轉
+        redirectNowBtn.addEventListener('click', () => {
+            executeRedirect();
+        });
+
+        // 2. 暫停 / 恢復
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+
+            if (isPaused) {
+                pauseIcon.className = "fa-solid fa-play";
+                pauseText.textContent = "繼續";
+                statusText.textContent = "PAUSED";
+                statusDot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400";
+                statusPing.className = "hidden";
+                countdownNumber.classList.remove('neon-text-cyan');
+                countdownNumber.classList.add('text-slate-400');
+            } else {
+                pauseIcon.className = "fa-solid fa-pause";
+                pauseText.textContent = "暫停";
+                statusText.textContent = "SYSTEM REDIRECTING";
+                statusDot.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-cyber-cyan";
+                statusPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-cyber-cyan opacity-75";
+                countdownNumber.classList.add('neon-text-cyan');
+                countdownNumber.classList.remove('text-slate-400');
+            }
+        });
+
+        // 3. 切換設定面板
+        toggleConfigBtn.addEventListener('click', () => {
+            configPanel.classList.toggle('hidden');
+        });
+
+        // 4. 更新自訂網址
+        function applyCustomUrl() {
+            let newUrl = customUrlInput.value.trim();
+            if (!newUrl) return;
+
+            // 自動補充 http/https 協定
+            if (!/^https?:\/\//i.test(newUrl)) {
+                newUrl = 'https://' + newUrl;
+            }
+
+            updateTargetUrlDisplay(newUrl);
+            
+            // 重置計時器
+            remainingTime = totalSeconds;
+            if (isPaused) {
+                pauseBtn.click(); // 若暫停中則恢復
+            }
+            updateUI();
+        }
+
+        updateUrlBtn.addEventListener('click', applyCustomUrl);
+        customUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                applyCustomUrl();
+            }
+        });
+
+        // --- 背景 3D 粒子背景動畫 (Canvas) ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let particles = [];
+        const particleCount = 40;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#b026ff';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製粒子間連線
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = '#00f3ff';
+                        ctx.globalAlpha = (1 - dist / 120) * 0.15;
+                        ctx.stroke();
+                        ctx.globalAlpha = 1.0;
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        // 頁面載入後啟動
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+
+        window.onload = function() {
+            resizeCanvas();
+            initParticles();
+            animateParticles();
+            init();
+        };
+    </script>
+</body>
+</html>

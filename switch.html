@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch 固件升級與刷機教學指南</title>
+
+    <!-- 防止搜尋引擎索引、抓取與建立快照 (SEO Block) -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet">
+
+    <!-- Open Graph (OG) / Facebook 分享標籤 -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Switch 固件升級與更新指南">
+    <meta property="og:description" content="詳細的 Switch 固件與大氣層 (AMS) 升級圖文指南。">
+    <meta property="og:image" content="https://raw.githubusercontent.com/jackyeh1982/Tan-Tan-travel-diary/refs/heads/main/Switch%E4%BA%94%E6%9C%88/switchboss.jpg">
+    <meta property="og:site_name" content="Switch 固件升級教學指南">
+
+    <!-- Twitter 卡片標籤 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Switch 固件升級與更新指南">
+    <meta name="twitter:description" content="詳細的 Switch 固件與大氣層 (AMS) 升級圖文指南。">
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/jackyeh1982/Tan-Tan-travel-diary/refs/heads/main/Switch%E4%BA%94%E6%9C%88/switchboss.jpg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        neon: {
+                            cyan: '#00f3ff',
+                            purple: '#bc13fe',
+                            pink: '#ff007f',
+                            dark: '#0a0a12',
+                            card: '#121222'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #00f3ff 0%, #bc13fe 50%, #ff007f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-card {
+            background: rgba(18, 18, 34, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 50px -10px rgba(188, 19, 254, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-neon-dark text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-neon-pink selection:text-white">
+
+    <!-- 背景光暈裝飾 -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neon-purple/20 rounded-full blur-[120px] animate-pulse-glow"></div>
+        <div class="absolute top-[30%] right-[-10%] w-[450px] h-[450px] bg-neon-cyan/20 rounded-full blur-[140px] animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+    </div>
+
+    <!-- 主頁 Hero Section -->
+    <section id="hero" class="relative pt-16 pb-8 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 z-10 max-w-4xl mx-auto text-center">
+        
+        <!-- 1. 頭像貼圖 (Avatar Image) -->
+        <div class="relative group mb-6">
+            <!-- 外圍閃耀光暈 -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink rounded-full blur-xl opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse-glow"></div>
+            
+            <!-- 圓形頭像容器 -->
+            <div class="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden p-1 bg-neon-dark border-2 border-white/20 animate-float">
+                <img 
+                    src="https://raw.githubusercontent.com/jackyeh1982/Tan-Tan-travel-diary/refs/heads/main/Switch%E4%BA%94%E6%9C%88/switchboss.jpg" 
+                    alt="五月" 
+                    class="w-full h-full object-cover rounded-full transform transition-transform duration-500 group-hover:scale-110"
+                    onerror="this.src='https://placehold.co/400x400/101020/00f3ff?text=BOSS'"
+                />
+            </div>
+        </div>
+
+        <!-- 2. 頭像下方標題 -->
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight mb-4 leading-tight">
+            Switch <span class="gradient-text">固件升級與更新指南</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base max-w-xl mb-8">
+            請嚴格照著以下步驟操作，確保 Switch 固件順利更新至最新版本！
+        </p>
+
+        <!-- 快速下載按鈕 (步驟1連結) -->
+        <a href="https://drive.google.com/uc?id=1du_AZM6GV8kjnZOwH4lekG4j6qDO9G2Y&export=download" 
+           target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink text-white font-bold text-base shadow-lg hover:shadow-[0_0_30px_rgba(0,243,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300">
+            <i data-lucide="download" class="w-5 h-5"></i>
+            下載固件升級包檔案 23.0.1|AMS1.12.1|E
+        </a>
+    </section>
+
+    <!-- 步驟內容區段 -->
+    <section class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        
+        <div class="space-y-4">
+            
+            <!-- 步驟 1 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-cyan flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cyan/20 text-neon-cyan font-black flex items-center justify-center text-sm">1</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">下載並解壓縮整合包</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        點擊上方下載按鈕下載固件壓縮包，並將其解壓縮到電腦資料夾中備用。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 步驟 2 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-purple flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-purple/20 text-neon-purple font-black flex items-center justify-center text-sm">2</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">清理 Switch 記憶卡舊檔</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-2">
+                        將 Switch 關機，取出記憶卡插到電腦。
+                    </p>
+                    <div class="p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-xl text-red-200">
+                        ⚠️ <strong>重要保留項目：</strong> 僅留下 <code class="bg-black/50 px-1.5 py-0.5 rounded text-neon-cyan">emummc</code> (一定要有)、<code class="bg-black/50 px-1.5 py-0.5 rounded text-slate-300">Nintendo</code> 與 <code class="bg-black/50 px-1.5 py-0.5 rounded text-slate-300">JKSV</code> (這兩個沒有沒關係) 這三個資料夾，<strong>其他檔案及資料夾全刪掉</strong>！
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步驟 3 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-pink flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-pink/20 text-neon-pink font-black flex items-center justify-center text-sm">3</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">複製新固件檔案</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        把步驟 1 下載解壓後的<strong class="text-neon-pink">「檔案全部 (不是整個資料夾)」</strong>直接複製貼到記憶卡根目錄裡。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 步驟 4 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-cyan flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cyan/20 text-neon-cyan font-black flex items-center justify-center text-sm">4</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">插回記憶卡並開機</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        記憶卡放回 Switch，然後開機（如果是軟改機請使用注入器引導）。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 步驟 5 & 6 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-purple flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-purple/20 text-neon-purple font-black flex items-center justify-center text-sm">5-6</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">設定 Autoboot 自動開機</h3>
+                    <ol class="list-disc list-inside text-slate-300 text-sm space-y-1">
+                        <li>點擊右上角的 <strong class="text-white">Options</strong> 進去。</li>
+                        <li>點擊左上角的 <strong class="text-white">Autoboot</strong>。</li>
+                        <li>選擇第一個 <strong class="text-neon-cyan">CFW</strong>，然後點擊下方 <strong class="text-white">Save</strong> 保存。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 步驟 7 & 8 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-pink flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-pink/20 text-neon-pink font-black flex items-center justify-center text-sm">7-8</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">萃取 KEY (Lockpick) 與重啟</h3>
+                    <ol class="list-disc list-inside text-slate-300 text-sm space-y-1">
+                        <li>點擊最頂部的 <strong class="text-white">Home</strong>，選 <strong class="text-white">payloads</strong>，再選 <strong class="text-neon-pink">lockpick</strong>。</li>
+                        <li>進入後按一下<strong class="text-white">電源鍵</strong>進行取 Key，完成後再按一次<strong class="text-white">電源鍵</strong>。</li>
+                        <li>使用<strong class="text-white">音量鍵 +-</strong> 移動選擇到 <strong class="text-neon-cyan">reboot to hekate</strong>，按一下電源鍵確認。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 步驟 9 & 10 -->
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-neon-cyan flex gap-4 items-start">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cyan/20 text-neon-cyan font-black flex items-center justify-center text-sm">9-10</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-1">執行 Daybreak 系統升級</h3>
+                    <ol class="list-disc list-inside text-slate-300 text-sm space-y-1">
+                        <li>進入系統後打開<strong class="text-white">相簿</strong>，找到 <strong class="text-neon-cyan">daybreak</strong> 程式點擊開啟。</li>
+                        <li>選擇 <strong class="text-white">安裝更新 (Install)</strong>，選取 <strong class="text-neon-purple">23.0.1</strong> 資料夾。</li>
+                        <li>一路無腦按 <strong class="text-neon-pink font-bold">A 鍵</strong>，等待進度條跑完 100% 後選擇 <strong class="text-white">reboot</strong> 重啟。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 步驟 11 -->
+            <div class="glass-card p-6 rounded-2xl border-2 border-neon-cyan/50 bg-neon-cyan/5 flex gap-4 items-start shadow-[0_0_30px_rgba(0,243,255,0.15)]">
+                <span class="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cyan text-black font-black flex items-center justify-center text-sm">11</span>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-neon-cyan mb-1 flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        驗證版本完成更新
+                    </h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-2">
+                        再次開機進入系統後，至 <strong class="text-white">設定 -> 系統</strong> 查看系統版本：
+                    </p>
+                    <div class="inline-block px-3 py-1.5 rounded-lg bg-black/60 border border-neon-cyan/40 text-neon-cyan font-mono text-sm font-bold">
+                        23.0.1|AMS1.12.1|E
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- 頁尾 Footer -->
+    <footer class="border-t border-white/10 relative z-10 bg-black/40 py-8">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-xs sm:text-sm">
+                &copy; Switch 固件教學專頁 · 請按步驟謹慎操作
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript 腳本 -->
+    <script>
+        // 初始化 Lucide 圖標
+        lucide.createIcons();
+    </script>
+</body>
+</html>
