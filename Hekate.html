@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch 虛擬系統 (emuMMC) 設置指南</title>
+
+    <!-- Favicon 網頁圖示 -->
+    <link rel="icon" type="image/jpeg" href="https://jackyeh1982.github.io/bosscl312/ico/64.ico">
+    <link rel="apple-touch-icon" href="https://jackyeh1982.github.io/bosscl312/ico/64.ico">
+
+    <!-- SEO Block -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet">
+
+    <!-- Open Graph (OG) / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Switch 虛擬系統 (emuMMC) 設置指南">
+    <meta property="og:description" content="詳細的 Switch 大氣層虛擬系統製作與啟動步驟圖文教學。">
+    <meta property="og:image" content="https://jackyeh1982.github.io/bosscl312/images/600x314.png">
+    <meta property="og:site_name" content="Switch 虛擬系統設置指南">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Switch 虛擬系統 (emuMMC) 設置指南">
+    <meta name="twitter:description" content="詳細的 Switch 大氣層虛擬系統製作與啟動步驟圖文教學。">
+    <meta name="twitter:image" content="https://jackyeh1982.github.io/bosscl312/images/600x314.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        neon: {
+                            cyan: '#00f3ff',
+                            purple: '#bc13fe',
+                            pink: '#ff007f',
+                            amber: '#ffb703',
+                            dark: '#080811',
+                            card: '#121225',
+                            border: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 5s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+                        'shimmer': 'shimmer 2.5s infinite linear',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+                            '50%': { opacity: '0.6', transform: 'scale(1.08)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 背景網格動態線條 */
+        .bg-grid-pattern {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f3ff 0%, #bc13fe 50%, #ff007f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(18, 18, 37, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card-hover:hover {
+            border-color: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0, 243, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* 折疊卡片動畫 */
+        .accordion-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .accordion-item.active .accordion-content {
+            grid-template-rows: 1fr;
+            opacity: 1;
+        }
+
+        .accordion-inner {
+            overflow: hidden;
+        }
+
+        .chevron-icon {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .accordion-item.active .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 複製提示 Toast */
+        #toast {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+
+        /* 自訂滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080811;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e1e38;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+    </style>
+</head>
+<body class="bg-neon-dark text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-neon-pink selection:text-white min-h-screen flex flex-col justify-between">
+
+    <!-- 動態背景裝飾 -->
+    <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
+        <div class="absolute top-[-5%] left-[-10%] w-[550px] h-[550px] bg-neon-purple/20 rounded-full blur-[140px] animate-pulse-glow"></div>
+        <div class="absolute top-[35%] right-[-10%] w-[500px] h-[500px] bg-neon-cyan/15 rounded-full blur-[150px] animate-pulse-glow" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[10%] left-[20%] w-[400px] h-[400px] bg-neon-pink/15 rounded-full blur-[130px] animate-pulse-glow" style="animation-delay: 1s;"></div>
+    </div>
+
+    <!-- 頂部導航列 / 狀態列 -->
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-neon-dark/80 border-b border-white/10">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-neon-cyan to-neon-purple p-[1px]">
+                    <div class="w-full h-full bg-neon-dark rounded-[7px] flex items-center justify-center">
+                        <i data-lucide="gamepad-2" class="w-4 h-4 text-neon-cyan"></i>
+                    </div>
+                </div>
+                <span class="font-bold text-sm tracking-wide text-white">Switch <span class="text-neon-cyan">emuMMC</span></span>
+            </div>
+
+            <!-- 右側控制按鈕 -->
+            <div class="flex items-center gap-2">
+                <button id="toggle-all-btn" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-neon-cyan"></i>
+                    <span id="toggle-all-text">全部展開</span>
+                </button>
+            </div>
+        </div>
+        <!-- 閱讀進度條 -->
+        <div class="w-full h-[2px] bg-white/5">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink w-0 transition-all duration-150"></div>
+        </div>
+    </header>
+
+    <!-- 主頁 Hero Section -->
+    <main class="relative z-10 flex-grow">
+        <section id="hero" class="pt-8 pb-6 flex flex-col justify-center items-center px-4 max-w-4xl mx-auto text-center">
+            
+            <!-- 大頭照 / 圖示 -->
+            <div class="relative group mb-5 cursor-pointer">
+                <div class="absolute -inset-1 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink rounded-full blur-xl opacity-70 group-hover:opacity-100 transition duration-500 animate-pulse-glow"></div>
+                <div class="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden p-1 bg-neon-dark border-2 border-white/20 shadow-2xl animate-float">
+                    <img 
+                        src="https://jackyeh1982.github.io/bosscl312/switchboss.jpg" 
+                        alt="SwitchBoss" 
+                        class="w-full h-full object-cover rounded-full transform transition-transform duration-500 group-hover:scale-110"
+                        onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/ico/256.ico';"
+                    />
+                </div>
+                <span class="absolute bottom-1 right-1 bg-emerald-500 border-2 border-neon-dark w-4 h-4 rounded-full shadow-lg" title="線上維修指南已啟用"></span>
+            </div>
+
+            <!-- 標題與簡介 -->
+            <div class="w-full max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-purple/10 border border-neon-purple/30 text-neon-purple text-xs font-semibold mb-3">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>大氣層 Atmosphere 虛擬系統完全教程</span>
+                </div>
+                <h1 class="text-2xl sm:text-4xl font-black tracking-tight mb-3 leading-tight text-white">
+                    Switch <span class="gradient-text">虛擬系統 (emuMMC) 設置指南</span>
+                </h1>
+                <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
+                    請按步驟順序執行。點擊步驟卡片可展開完整圖文步驟細節，協助您輕鬆完成虛擬系統製作！
+                </p>
+            </div>
+
+            <!-- 統計快查列 -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full max-w-lg mt-6 px-2">
+                <div class="glass-card p-2.5 sm:p-3 rounded-xl text-center border-white/5">
+                    <div class="text-xs text-slate-400 mb-0.5">總步驟數</div>
+                    <div class="text-base sm:text-lg font-bold text-neon-cyan">10 個大步驟</div>
+                </div>
+                <div class="glass-card p-2.5 sm:p-3 rounded-xl text-center border-white/5">
+                    <div class="text-xs text-slate-400 mb-0.5">預估耗時</div>
+                    <div class="text-base sm:text-lg font-bold text-neon-purple">10 - 15 分鐘</div>
+                </div>
+                <div class="glass-card p-2.5 sm:p-3 rounded-xl text-center border-white/5">
+                    <div class="text-xs text-slate-400 mb-0.5">難易度</div>
+                    <div class="text-base sm:text-lg font-bold text-neon-pink">初學者友善</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步驟卡片列表 -->
+        <section class="relative z-10 max-w-4xl mx-auto px-3 sm:px-6 pb-16">
+            
+            <div class="flex items-center justify-between mb-4 px-1">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="list-ordered" class="w-4 h-4 text-neon-cyan"></i>
+                    <span class="text-xs sm:text-sm text-slate-300 font-semibold">詳細操作流程</span>
+                </div>
+                <span id="step-counter" class="text-xs text-slate-500">已展開 <span id="open-count" class="text-neon-cyan font-bold">0</span> / 10 步驟</span>
+            </div>
+
+            <div class="space-y-3 sm:space-y-4" id="accordion-container">
+                
+                <!-- 步驟 01 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-cyan overflow-hidden" data-step="1">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-black flex items-center justify-center text-sm shadow-sm">01</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white group-hover:text-neon-cyan transition-colors">下載大氣層引導文件並拷貝</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">解壓整合包並覆蓋至 TF 記憶卡根目錄</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">檔案準備</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                下載最新版的大氣層引導文件整合包。解壓後將裡面的全部檔案與資料夾，完整拷貝並覆蓋至 Switch 的 TF (microSD) 記憶卡根目錄中。
+                            </p>
+                            <!-- 步驟圖片區 -->
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/01.jpg" 
+                                        alt="步驟01 - 大氣層引導檔案複製示意圖" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 02 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-purple overflow-hidden" data-step="2">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple/10 border border-neon-purple/30 text-neon-purple font-black flex items-center justify-center text-sm shadow-sm">02</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">開機進入 Hekate 並點選 emuMMC</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">進入引導選單管理介面</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">引導介面</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                插上記憶卡並開機。進入 Hekate 主選單頁面後，點擊右側的 <strong class="text-neon-cyan font-semibold">emuMMC</strong> 圖示按鈕。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/02.jpg" 
+                                        alt="步驟02 - Hekate 點擊 emuMMC" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 03 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-pink overflow-hidden" data-step="3">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-pink/10 border border-neon-pink/30 text-neon-pink font-black flex items-center justify-center text-sm shadow-sm">03</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">創建虛擬系統 (Create emuMMC)</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">進入虛擬系統創建嚮導</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">系統建立</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                在 emuMMC 管理頁面中，點擊右側的 <strong class="text-neon-pink font-semibold">Create emuMMC</strong> 按鈕開始製作虛擬系統。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/03.jpg" 
+                                        alt="步驟03 - Create emuMMC" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 04 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-cyan overflow-hidden" data-step="4">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-black flex items-center justify-center text-sm shadow-sm">04</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">選擇 SD File 虛擬系統類型</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">指定虛擬系統存放模式</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">類型選擇</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                畫面上彈出虛擬系統類型選項提示框後，點擊選取最右側的 <strong class="text-neon-cyan font-semibold">SD File</strong>。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/04.jpg" 
+                                        alt="步驟04 - SD File 類型選擇" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 05 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-purple overflow-hidden" data-step="5">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple/10 border border-neon-purple/30 text-neon-purple font-black flex items-center justify-center text-sm shadow-sm">05</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">等待創建結束並關閉窗口</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">系統製作中，請保持電量充足</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">自動生成</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                系統進度條將開始跑動，請耐心等待虛擬系統創建結束。進度完成後，點擊右上角的 <strong class="text-white font-semibold">Close</strong> 關閉進度視窗。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/05.jpg" 
+                                        alt="步驟05 - 創建完成 Close" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 06 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-pink overflow-hidden" data-step="6">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-pink/10 border border-neon-pink/30 text-neon-pink font-black flex items-center justify-center text-sm shadow-sm">06</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">確認 Enabled 狀態並返回首頁</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">核對虛擬系統是否已順利啟用</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">狀態確認</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                返回虛擬系統管理頁面，確認左上角此時應會顯示綠色亮起的 <strong class="text-emerald-400 font-bold">Enabled!</strong> 標示。確認無誤後，點擊右上角 <strong class="text-white font-semibold">Close</strong> 返回 Hekate 主頁。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/06.jpg" 
+                                        alt="步驟06 - 顯示 Enabled" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 07 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-cyan overflow-hidden" data-step="7">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-black flex items-center justify-center text-sm shadow-sm">07</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">點擊 Launch 啟動項目</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">準備載入系統引導選單</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">系統引導</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                在 Hekate 主頁面中，點擊最左側的第一個按鈕 <strong class="text-neon-cyan font-semibold">Launch</strong>。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/07.jpg" 
+                                        alt="步驟07 - Launch 按鈕" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 08 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-purple overflow-hidden" data-step="8">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple/10 border border-neon-purple/30 text-neon-purple font-black flex items-center justify-center text-sm shadow-sm">08</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">點擊虛擬系統進入大氣層</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">啟動至虛擬系統環境</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">開機載入</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <p class="text-slate-300 text-sm leading-relaxed sm:pl-13 mb-4">
+                                在啟動選單中點擊 <strong class="text-neon-purple font-semibold">虛擬系統</strong> 選項，主機即會透過大氣層引導進入虛擬系統。
+                            </p>
+                            <div class="sm:pl-13">
+                                <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/08.jpg" 
+                                        alt="步驟08 - 點選虛擬系統" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 09 (高亮強調卡片) -->
+                <div class="accordion-item glass-card rounded-2xl border-2 border-neon-cyan/60 bg-gradient-to-b from-neon-cyan/10 to-transparent overflow-hidden shadow-[0_0_25px_rgba(0,243,255,0.12)] transition-all duration-300" data-step="9">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan text-black font-black flex items-center justify-center text-sm shadow-md">09</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-neon-cyan flex items-center gap-1.5">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 flex-shrink-0"></i>
+                                    核對系統版本 (帶有 E 標示)
+                                </h2>
+                                <p class="text-xs text-slate-300 font-normal mt-0.5">關鍵步驟：確認當前處於虛擬系統</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan text-[11px] font-medium border border-neon-cyan/30">重點驗證</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-neon-cyan flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-neon-cyan/20">
+                            <div class="sm:pl-13">
+                                <p class="text-slate-200 text-sm leading-relaxed mb-4">
+                                    開機進入系統後，前往 <strong class="text-white font-semibold">設置 → 主機信息</strong> 核對系統版本：<br>
+                                    版本號最後方若帶有字母 <strong class="text-neon-cyan font-bold bg-neon-cyan/10 px-2 py-0.5 rounded border border-neon-cyan/30">E</strong> (例如: AMS 1.7.0|E)，即代表目前成功運行於<strong class="text-white">虛擬系統 (emuMMC)</strong>。<br>
+                                    <span class="text-xs text-slate-400 mt-1 block">（註：若顯示字母 <strong class="text-neon-pink">S</strong> 則表示為真實系統 SysMMC，請勿在真實系統進行敏感操作）</span>
+                                </p>
+                                <div class="overflow-hidden rounded-xl border border-neon-cyan/30 bg-black/40 shadow-inner">
+                                    <img 
+                                        src="https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/images/09.jpg" 
+                                        alt="步驟09 - 核對系統版本 E 標示" 
+                                        class="w-full max-h-96 object-contain mx-auto"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步驟 10 (路徑說明與重點) -->
+                <div class="accordion-item glass-card rounded-2xl border-2 border-neon-purple/50 bg-gradient-to-b from-neon-purple/10 to-transparent overflow-hidden shadow-[0_0_25px_rgba(188,19,254,0.12)] transition-all duration-300" data-step="10">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple text-white font-black flex items-center justify-center text-sm shadow-md">10</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-neon-purple flex items-center gap-1.5">
+                                    <i data-lucide="folder-tree" class="w-5 h-5 flex-shrink-0"></i>
+                                    虛擬系統檔案路徑說明
+                                </h2>
+                                <p class="text-xs text-slate-300 font-normal mt-0.5">TF 記憶卡內部目錄對照指南</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple text-[11px] font-medium border border-neon-purple/30">目錄結構</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-neon-purple flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-neon-purple/20">
+                            <div class="sm:pl-13 space-y-4">
+                                <p class="text-slate-300 text-sm leading-relaxed">
+                                    完成設置後，虛擬系統的核心檔案與遊戲截圖檔案將單獨存放在 TF 記憶卡特定路徑下：
+                                </p>
+                                
+                                <!-- 路徑 1 -->
+                                <div class="p-3 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between group">
+                                    <div class="overflow-x-auto mr-2">
+                                        <span class="text-xs text-slate-400 block mb-0.5">虛擬系統核心檔路徑：</span>
+                                        <code class="text-neon-cyan font-mono text-xs sm:text-sm font-semibold whitespace-nowrap">/emuMMC/SD00/eMMC/</code>
+                                    </div>
+                                    <button onclick="copyToClipboard('/emuMMC/SD00/eMMC/')" class="p-2 rounded-lg bg-white/5 hover:bg-neon-cyan/20 text-slate-400 hover:text-neon-cyan transition-colors cursor-pointer flex-shrink-0" title="複製路徑">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+
+                                <!-- 路徑 2 -->
+                                <div class="p-3 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between group">
+                                    <div class="overflow-x-auto mr-2">
+                                        <span class="text-xs text-slate-400 block mb-0.5">虛擬系統截圖及安裝檔案保存路徑：</span>
+                                        <code class="text-neon-pink font-mono text-xs sm:text-sm font-semibold whitespace-nowrap">/emuMMC/SD00/Nintendo/</code>
+                                    </div>
+                                    <button onclick="copyToClipboard('/emuMMC/SD00/Nintendo/')" class="p-2 rounded-lg bg-white/5 hover:bg-neon-pink/20 text-slate-400 hover:text-neon-pink transition-colors cursor-pointer flex-shrink-0" title="複製路徑">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- 頁尾 Footer -->
+    <footer class="border-t border-white/10 relative z-10 bg-neon-dark/90 py-8">
+        <div class="max-w-4xl mx-auto px-4 text-center space-y-3">
+            <div class="flex items-center justify-center gap-2 text-slate-400 text-xs">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-neon-amber"></i>
+                <span>請務必小心操作並自行備份重要資料</span>
+            </div>
+            <p class="text-slate-500 text-xs">
+                &copy; Switch 維修與教學專頁 · Designed for best user experience
+            </p>
+        </div>
+    </footer>
+
+    <!-- 浮動返回頂部按鈕 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-40 p-3 rounded-full glass-card text-neon-cyan border-neon-cyan/40 shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer" title="返回頂部">
+        <i data-lucide="arrow-up" class="w-5 h-5"></i>
+    </button>
+
+    <!-- Toast 提示訊息 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-neon-cyan/50 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none translate-y-12 opacity-0">
+        <i data-lucide="check-circle" class="w-4 h-4 text-neon-cyan"></i>
+        <span id="toast-msg" class="text-xs font-medium"></span>
+    </div>
+
+    <!-- JavaScript 腳本 -->
+    <script>
+        // 初始化 Lucide 圖標
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            const toggleAllBtn = document.getElementById('toggle-all-btn');
+            const toggleAllText = document.getElementById('toggle-all-text');
+            const openCountSpan = document.getElementById('open-count');
+            const progressBar = document.getElementById('progress-bar');
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            // 預設展開第 1 個步驟
+            if(accordionItems.length > 0) {
+                accordionItems[0].classList.add('active');
+            }
+            updateOpenCount();
+
+            // 隱藏式下拉選單 (Accordion) 點擊互動
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                    updateOpenCount();
+                });
+            });
+
+            // 全部展開 / 折疊切換
+            let isAllOpen = false;
+            toggleAllBtn.addEventListener('click', () => {
+                isAllOpen = !isAllOpen;
+                accordionItems.forEach(item => {
+                    if (isAllOpen) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                toggleAllText.textContent = isAllOpen ? '全部折疊' : '全部展開';
+                updateOpenCount();
+            });
+
+            // 更新已展開計數器
+            function updateOpenCount() {
+                const activeItems = document.querySelectorAll('.accordion-item.active');
+                openCountSpan.textContent = activeItems.length;
+                
+                if (activeItems.length === accordionItems.length) {
+                    isAllOpen = true;
+                    toggleAllText.textContent = '全部折疊';
+                } else if (activeItems.length === 0) {
+                    isAllOpen = false;
+                    toggleAllText.textContent = '全部展開';
+                }
+            }
+
+            // 頁面滾動進度條 & 返回頂部按鈕
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                progressBar.style.width = scrollPercent + '%';
+
+                if (scrollTop > 300) {
+                    backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // 複製文本至剪貼簿
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('已複製路徑到剪貼簿！');
+            } catch (err) {
+                showToast('複製失敗，請手動複製');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Toast 訊息顯示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('translate-y-12', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-12', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

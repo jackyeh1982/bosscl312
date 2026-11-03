@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch 大氣層目錄結構與對照指南</title>
+
+    <!-- Favicon 網頁圖示 -->
+    <link rel="icon" type="image/jpeg" href="https://jackyeh1982.github.io/bosscl312/ico/64.ico">
+    <link rel="apple-touch-icon" href="https://jackyeh1982.github.io/bosscl312/ico/64.ico">
+
+    <!-- SEO Block -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet">
+
+    <!-- Open Graph (OG) / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Switch 大氣層目錄結構與對照指南">
+    <meta property="og:description" content="詳細的 Switch 大氣層虛擬系統與記憶卡目錄結構對照解析。">
+    <meta property="og:image" content="https://jackyeh1982.github.io/bosscl312/images/600x314.png">
+    <meta property="og:site_name" content="Switch 大氣層結構指南">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Switch 大氣層目錄結構與對照指南">
+    <meta name="twitter:description" content="詳細的 Switch 大氣層虛擬系統與記憶卡目錄結構對照解析。">
+    <meta name="twitter:image" content="https://jackyeh1982.github.io/bosscl312/images/600x314.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        neon: {
+                            cyan: '#00f3ff',
+                            purple: '#bc13fe',
+                            pink: '#ff007f',
+                            amber: '#ffb703',
+                            dark: '#080811',
+                            card: '#121225',
+                            border: 'rgba(255, 255, 255, 0.08)'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 5s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+                        'shimmer': 'shimmer 2.5s infinite linear',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+                            '50%': { opacity: '0.6', transform: 'scale(1.08)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 背景網格動態線條 */
+        .bg-grid-pattern {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f3ff 0%, #bc13fe 50%, #ff007f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(18, 18, 37, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card-hover:hover {
+            border-color: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(0, 243, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* 折疊卡片動畫 */
+        .accordion-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .accordion-item.active .accordion-content {
+            grid-template-rows: 1fr;
+            opacity: 1;
+        }
+
+        .accordion-inner {
+            overflow: hidden;
+        }
+
+        .chevron-icon {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .accordion-item.active .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 複製提示 Toast */
+        #toast {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+
+        /* 自訂滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080811;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e1e38;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+    </style>
+</head>
+<body class="bg-neon-dark text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-neon-pink selection:text-white min-h-screen flex flex-col justify-between">
+
+    <!-- 動態背景裝飾 -->
+    <div class="fixed inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
+        <div class="absolute top-[-5%] left-[-10%] w-[550px] h-[550px] bg-neon-purple/20 rounded-full blur-[140px] animate-pulse-glow"></div>
+        <div class="absolute top-[35%] right-[-10%] w-[500px] h-[500px] bg-neon-cyan/15 rounded-full blur-[150px] animate-pulse-glow" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-[10%] left-[20%] w-[400px] h-[400px] bg-neon-pink/15 rounded-full blur-[130px] animate-pulse-glow" style="animation-delay: 1s;"></div>
+    </div>
+
+    <!-- 頂部導航列 / 狀態列 -->
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-neon-dark/80 border-b border-white/10">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-neon-cyan to-neon-purple p-[1px]">
+                    <div class="w-full h-full bg-neon-dark rounded-[7px] flex items-center justify-center">
+                        <i data-lucide="folder-tree" class="w-4 h-4 text-neon-cyan"></i>
+                    </div>
+                </div>
+                <span class="font-bold text-sm tracking-wide text-white">Switch <span class="text-neon-cyan">Atmosphere</span></span>
+            </div>
+
+            <!-- 右側控制按鈕 -->
+            <div class="flex items-center gap-2">
+                <button id="toggle-all-btn" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 text-neon-cyan"></i>
+                    <span id="toggle-all-text">全部展開</span>
+                </button>
+            </div>
+        </div>
+        <!-- 閱讀進度條 -->
+        <div class="w-full h-[2px] bg-white/5">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink w-0 transition-all duration-150"></div>
+        </div>
+    </header>
+
+    <!-- 主頁 Hero Section -->
+    <main class="relative z-10 flex-grow">
+        <section id="hero" class="pt-8 pb-6 flex flex-col justify-center items-center px-4 max-w-4xl mx-auto text-center">
+            
+            <!-- 大頭照 / 圖示 -->
+            <div class="relative group mb-5 cursor-pointer">
+                <div class="absolute -inset-1 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink rounded-full blur-xl opacity-70 group-hover:opacity-100 transition duration-500 animate-pulse-glow"></div>
+                <div class="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden p-1 bg-neon-dark border-2 border-white/20 shadow-2xl animate-float">
+                    <img 
+                        src="https://jackyeh1982.github.io/bosscl312/switchboss.jpg" 
+                        alt="SwitchBoss" 
+                        class="w-full h-full object-cover rounded-full transform transition-transform duration-500 group-hover:scale-110"
+                        onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/jackyeh1982/bosscl312/refs/heads/main/ico/256.ico';"
+                    />
+                </div>
+                <span class="absolute bottom-1 right-1 bg-emerald-500 border-2 border-neon-dark w-4 h-4 rounded-full shadow-lg" title="線上維修指南已啟用"></span>
+            </div>
+
+            <!-- 標題與簡介 -->
+            <div class="w-full max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-purple/10 border border-neon-purple/30 text-neon-purple text-xs font-semibold mb-3">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>大氣層 Atmosphere 記憶卡結構解析</span>
+                </div>
+                <h1 class="text-2xl sm:text-4xl font-black tracking-tight mb-3 leading-tight text-white">
+                    大氣層 <span class="gradient-text">結構對照與目錄說明</span>
+                </h1>
+                <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto">
+                    詳細解析 TF 記憶卡根目錄下各大關鍵資料夾之核心用途、內部結構與運作機制。
+                </p>
+            </div>
+
+            <!-- 統計快查列 -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full max-w-lg mt-6 px-2">
+                <div class="glass-card p-2.5 sm:p-3 rounded-xl text-center border-white/5">
+                    <div class="text-xs text-slate-400 mb-0.5">總資料夾數</div>
+                    <div class="text-base sm:text-lg font-bold text-neon-cyan">8 個核心目錄</div>
+                </div>
+                <div class="glass-card p-2.5 sm:p-3 rounded-xl text-center border-white/5">
+                    <div class="text-xs text-slate-400 mb-0.5">解析內容</div>
+                    <div class="text-base sm:text-lg font-bold text-neon-purple">底層/防Ban/補丁</div>
+                </div>
+                <div class="glass-card p-2.5 sm:p-3 rounded-xl text-center border-white/5">
+                    <div class="text-xs text-slate-400 mb-0.5">適用對象</div>
+                    <div class="text-base sm:text-lg font-bold text-neon-pink">進階用戶/維修</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 步驟卡片列表 -->
+        <section class="relative z-10 max-w-4xl mx-auto px-3 sm:px-6 pb-16">
+            
+            <div class="flex items-center justify-between mb-4 px-1">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="list-tree" class="w-4 h-4 text-neon-cyan"></i>
+                    <span class="text-xs sm:text-sm text-slate-300 font-semibold">目錄結構與用途說明</span>
+                </div>
+                <span id="step-counter" class="text-xs text-slate-500">已展開 <span id="open-count" class="text-neon-cyan font-bold">0</span> / 8 項目</span>
+            </div>
+
+            <div class="space-y-3 sm:space-y-4" id="accordion-container">
+                
+                <!-- 項目 00 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-cyan overflow-hidden" data-step="1">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-black flex items-center justify-center text-sm shadow-sm">00</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white group-hover:text-neon-cyan transition-colors">（23.0.1）系统升级包（官方固件離線包）</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">離線解密升級專用數據包</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">離線刷機</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-cyan">• 核心用途：</strong>存放任天堂官方系統（23.0.1）的完整固件加密檔案。</p>
+                                <p><strong class="text-neon-cyan">• 內部結構：</strong>資料夾內包含數百個以十六進位命名的 <code class="text-neon-cyan bg-black/40 px-1.5 py-0.5 rounded border border-white/10 font-mono text-xs">.nca</code> 短檔名檔案。</p>
+                                <p><strong class="text-neon-cyan">• 運作機制：</strong>大氣層虛擬系統無法直接透過官方伺服器聯網更新（會導致被任天堂官方伺服器 Ban 機，或因為套用新版加密導致自製系統衝突黑屏）。此資料夾是專門提供給大氣層內建的刷機軟體 Daybreak 進行「本地離線安全解密與安裝」使用。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 01 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-purple overflow-hidden" data-step="2">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple/10 border border-neon-purple/30 text-neon-purple font-black flex items-center justify-center text-sm shadow-sm">01</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">atmosphere（大氣層自製系統核心）</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">系統核心權限、補丁與防 Ban 控制器</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">核心大腦</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-purple">• 核心用途：</strong>整個自製系統的核心大腦。負責劫持原廠權限、載入自製模組、管理金手指、外掛插件，以及執行防 Ban 機制。</p>
+                                <div class="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs">
+                                    <div class="font-bold text-neon-purple mb-1 text-sm">關鍵子目錄與檔案說明：</div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-cyan font-mono font-semibold flex-shrink-0">/contents/</code>
+                                        <span class="text-slate-300">Mod 漢化包與金手指存放區。內含以遊戲 Title ID 命名的資料夾，用來存放該遊戲的修改檔（romfs）或 cheats（金手指文本）。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-pink font-mono font-semibold flex-shrink-0">/hosts/</code>
+                                        <span class="text-slate-300">防 Ban 阻斷區。內含 <code class="text-white">emummc.txt</code> 檔案，負責在底層過濾並封鎖任天堂所有官方伺服器的網址，確保虛擬系統聯網時不會將破解數據上傳。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-amber font-mono font-semibold flex-shrink-0">/exefs_patches/</code>
+                                        <span class="text-slate-300">核心補丁區（含 kiwifs_patches）。包含破解過期簽章、解除官方聯網限制、硬體超頻限制等底層修補檔。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-white font-mono font-semibold flex-shrink-0">package3</code>
+                                        <span class="text-slate-300">大氣層最核心的系統核心載入檔案。</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 02 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-pink overflow-hidden" data-step="3">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-pink/10 border border-neon-pink/30 text-neon-pink font-black flex items-center justify-center text-sm shadow-sm">02</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">bootloader（Hekate 引導與選單管理器）</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">開機前置引導與系統維護工具</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">開機引導</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-pink">• 核心用途：</strong>負責在主機剛開機、自製系統尚未啟動前的「前置引導階段」。提供圖形化觸控選單、NAND 系統備份、SD 卡分區修復等系統級維護工具。</p>
+                                <div class="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs">
+                                    <div class="font-bold text-neon-pink mb-1 text-sm">關鍵子目錄與檔案說明：</div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-cyan font-mono font-semibold flex-shrink-0">hekate_ipl.ini</code>
+                                        <span class="text-slate-300">開機選單配置檔。用文字決定開機圖形介面上有哪些啟動選項（如：進入虛擬系統、真實系統、正版系統、安卓系統等）。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-purple font-mono font-semibold flex-shrink-0">/payloads/</code>
+                                        <span class="text-slate-300">副載引導存放區。存放其他 <code class="text-white">.bin</code> 格式的工具（如用於導出 Switch 唯一金鑰的 Lockpick_RCM）。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-amber font-mono font-semibold flex-shrink-0">/sys/ & /res/</code>
+                                        <span class="text-slate-300">存放 Nyx（Hekate 的觸控圖形介面）的底層系統組件、中文字體包與背景主題圖案。</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 03 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-cyan overflow-hidden" data-step="4">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-black flex items-center justify-center text-sm shadow-sm">03</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">config（自製應用程式全球個人化配置）</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">獨立自製軟體設定參數區</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">軟體配置</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-cyan">• 核心用途：</strong>用來儲存各個獨立自製軟體（Homebrew）的系統級設定。</p>
+                                <p><strong class="text-neon-cyan">• 內部結構：</strong>內含許多以特定自製軟體名稱命名的資料夾。</p>
+                                <p><strong class="text-neon-cyan">• 運作機制：</strong>當您在 Switch 上調整了某個工具的設定（例如：修改了特斯拉選單的快捷鍵、主題安裝器的預設外觀、或是超頻工具的電壓參數），該應用程式會自動將偏好設定檔儲存在此，確保軟體更新時不會遺失使用者的個人化設定。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 04 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-purple overflow-hidden" data-step="5">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple/10 border border-neon-purple/30 text-neon-purple font-black flex items-center justify-center text-sm shadow-sm">04</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">emuMMC（虛擬系統引導配置與獨立儲存區）</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">實體機與虛擬系統實體隔離目錄</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">虛擬系統</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-purple">• 核心用途：</strong>負責將虛擬系統與主機內建的真實系統（SysNAND）進行資料完全隔離。</p>
+                                <div class="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs">
+                                    <div class="font-bold text-neon-purple mb-1 text-sm">關鍵子目錄與檔案說明：</div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-cyan font-mono font-semibold flex-shrink-0">emummc.ini</code>
+                                        <span class="text-slate-300">虛擬系統指向配置檔。告訴 Hekate 開機時虛擬系統到底位於 SD 卡的哪個分區（Partition）或哪個資料夾路徑（File），如果此檔案損壞，開機將抓不到虛擬系統。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-pink font-mono font-semibold flex-shrink-0">/SD00/ 或 /RAW1/</code>
+                                        <span class="text-slate-300">虛擬數據槽。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-amber font-mono font-semibold flex-shrink-0">/RAW1/Nintendo/</code>
+                                        <span class="text-slate-300">虛擬系統專屬的遊戲與存檔目錄。只要您在虛擬系統下安裝的數位遊戲、DLC、補丁更新、以及按相機鍵拍攝的相簿截圖，全部都被強制存鎖在這裡。</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 05 -->
+                <div class="accordion-item glass-card glass-card-hover rounded-2xl border-l-4 border-l-neon-pink overflow-hidden" data-step="6">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-pink/10 border border-neon-pink/30 text-neon-pink font-black flex items-center justify-center text-sm shadow-sm">05</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white">scripts（Hekate 自動化維護腳本）</h2>
+                                <p class="text-xs text-slate-400 font-normal mt-0.5">防呆與一鍵式維護指令腳本庫</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">維護腳本</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-slate-400 flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-white/5">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-pink">• 核心用途：</strong>存放供 Hekate 引導管理器讀取並執行的自動化腳本檔案（通常為 <code class="text-neon-pink bg-black/40 px-1.5 py-0.5 rounded border border-white/10 font-mono text-xs">.te</code> 結尾的文字檔）。</p>
+                                <p><strong class="text-neon-pink">• 內部結構：</strong>多由各大家整合包（如特斯拉、鹹魚、大白等）預先寫好的快捷工具。</p>
+                                <p><strong class="text-neon-pink">• 運作機制：</strong>使用者可在 Hekate 選單中一鍵執行這些腳本，進行如：「自動清除自製軟體殘留垃圾」、「一鍵搬移虛擬系統代號」、「自動備份特定金鑰」等防呆與自動化維護，省去手動用電腦修改的繁瑣步驟。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 06 (高亮強調卡片 - 經典工具集中區) -->
+                <div class="accordion-item glass-card rounded-2xl border-2 border-neon-cyan/60 bg-gradient-to-b from-neon-cyan/10 to-transparent overflow-hidden shadow-[0_0_25px_rgba(0,243,255,0.12)] transition-all duration-300" data-step="7">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-cyan text-black font-black flex items-center justify-center text-sm shadow-md">06</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-neon-cyan flex items-center gap-1.5">
+                                    <i data-lucide="package" class="w-5 h-5 flex-shrink-0"></i>
+                                    switch（自製軟體/應用程式集中地）
+                                </h2>
+                                <p class="text-xs text-slate-300 font-normal mt-0.5">所有自製工具 (.nro) 相簿程式庫</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-full bg-neon-cyan/20 text-neon-cyan text-[11px] font-medium border border-neon-cyan/30">核心軟體區</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-neon-cyan flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-neon-cyan/20">
+                            <div class="sm:pl-13 space-y-3 text-slate-200 text-sm leading-relaxed">
+                                <p><strong class="text-neon-cyan">• 核心用途：</strong>存放所有自製程式（擴充功能）的目錄。也就是您在 Switch 首頁進入「相簿」後，裡面所看到的所有工具軟體。</p>
+                                <p><strong class="text-neon-cyan">• 內部結構：</strong>存放各式各樣副檔名為 <code class="text-neon-cyan bg-black/40 px-1.5 py-0.5 rounded border border-neon-cyan/30 font-mono text-xs font-bold">.nro</code> 的可執行檔，通常一個軟體會佔用一個獨立資料夾。</p>
+                                <div class="p-3 rounded-xl bg-black/60 border border-neon-cyan/30 space-y-2 text-xs">
+                                    <div class="font-bold text-white mb-1 text-sm">內含經典工具：</div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-cyan font-mono font-semibold flex-shrink-0">Daybreak.nro</code>
+                                        <span>大氣層專屬官方固件安全離線刷機升級工具（配合 00 資料夾使用）。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-purple font-mono font-semibold flex-shrink-0">DBI.nro / Tinfoil.nro</code>
+                                        <span>強大的遊戲與補丁安裝器（支援 MTP 連接電腦）。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-pink font-mono font-semibold flex-shrink-0">JKSV.nro</code>
+                                        <span>Switch 遊戲存檔備份與還原的核心神器。</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <code class="text-neon-amber font-mono font-semibold flex-shrink-0">Awoo-Installer / Goldleaf</code>
+                                        <span>其他常見的 USB 遊戲安裝工具。</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 項目 07 (硬破晶片維護卡片) -->
+                <div class="accordion-item glass-card rounded-2xl border-2 border-neon-purple/50 bg-gradient-to-b from-neon-purple/10 to-transparent overflow-hidden shadow-[0_0_25px_rgba(188,19,254,0.12)] transition-all duration-300" data-step="8">
+                    <button class="accordion-header w-full p-4 sm:p-5 flex items-center justify-between text-left focus:outline-none cursor-pointer select-none">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span class="flex-shrink-0 w-9 h-9 rounded-xl bg-neon-purple text-white font-black flex items-center justify-center text-sm shadow-md">07</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-neon-purple flex items-center gap-1.5">
+                                    <i data-lucide="cpu" class="w-5 h-5 flex-shrink-0"></i>
+                                    warmboot_mariko（硬破晶片機專用休眠喚醒組件）
+                                </h2>
+                                <p class="text-xs text-slate-300 font-normal mt-0.5">續航版 / Lite / OLED 晶片休眠喚醒引導</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple text-[11px] font-medium border border-neon-purple/30">硬體相容</span>
+                            <i data-lucide="chevron-down" class="chevron-icon w-5 h-5 text-neon-purple flex-shrink-0 ml-1"></i>
+                        </div>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="accordion-inner p-4 sm:px-6 sm:pb-6 sm:pt-2 border-t border-neon-purple/20">
+                            <div class="sm:pl-13 space-y-3 text-slate-300 text-sm leading-relaxed">
+                                <p><strong class="text-neon-purple">• 核心用途：</strong>專為續航版、Lite、OLED 版（即採用 Mariko 晶片的硬破焊接主機）提供熱啟動（Warmboot）底層配置。</p>
+                                <p><strong class="text-neon-purple">• 運作機制：</strong>因為硬破主機是透過物理晶片漏洞強行注入代碼進入虛擬系統，當主機按下電源鍵進入「休眠模式」時，硬體電壓會被重置。若系統中沒有預先配置好對應此晶片版本的 <code class="text-neon-purple bg-black/40 px-1.5 py-0.5 rounded border border-neon-purple/30 font-mono text-xs">warmboot_mariko</code> 組件，主機在休眠後將因找不到喚醒引導而直接陷入死機（黑屏且按任何鍵無反應）。此資料夾即是確保晶片機在自製系統下能完美休眠與隨時喚醒。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <!-- 頁尾 Footer -->
+    <footer class="border-t border-white/10 relative z-10 bg-neon-dark/90 py-8">
+        <div class="max-w-4xl mx-auto px-4 text-center space-y-3">
+            <div class="flex items-center justify-center gap-2 text-slate-400 text-xs">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-neon-amber"></i>
+                <span>請務必小心操作並自行備份重要資料</span>
+            </div>
+            <p class="text-slate-500 text-xs">
+                &copy; Switch 維修與教學專頁 · Designed for best user experience
+            </p>
+        </div>
+    </footer>
+
+    <!-- 浮動返回頂部按鈕 -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 z-40 p-3 rounded-full glass-card text-neon-cyan border-neon-cyan/40 shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer" title="返回頂部">
+        <i data-lucide="arrow-up" class="w-5 h-5"></i>
+    </button>
+
+    <!-- Toast 提示訊息 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-neon-cyan/50 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none translate-y-12 opacity-0">
+        <i data-lucide="check-circle" class="w-4 h-4 text-neon-cyan"></i>
+        <span id="toast-msg" class="text-xs font-medium"></span>
+    </div>
+
+    <!-- JavaScript 腳本 -->
+    <script>
+        // 初始化 Lucide 圖標
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            const toggleAllBtn = document.getElementById('toggle-all-btn');
+            const toggleAllText = document.getElementById('toggle-all-text');
+            const openCountSpan = document.getElementById('open-count');
+            const progressBar = document.getElementById('progress-bar');
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            // 預設展開第 1 個步驟
+            if(accordionItems.length > 0) {
+                accordionItems[0].classList.add('active');
+            }
+            updateOpenCount();
+
+            // 隱藏式下拉選單 (Accordion) 點擊互動
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                    updateOpenCount();
+                });
+            });
+
+            // 全部展開 / 折疊切換
+            let isAllOpen = false;
+            toggleAllBtn.addEventListener('click', () => {
+                isAllOpen = !isAllOpen;
+                accordionItems.forEach(item => {
+                    if (isAllOpen) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                toggleAllText.textContent = isAllOpen ? '全部折疊' : '全部展開';
+                updateOpenCount();
+            });
+
+            // 更新已展開計數器
+            function updateOpenCount() {
+                const activeItems = document.querySelectorAll('.accordion-item.active');
+                openCountSpan.textContent = activeItems.length;
+                
+                if (activeItems.length === accordionItems.length) {
+                    isAllOpen = true;
+                    toggleAllText.textContent = '全部折疊';
+                } else if (activeItems.length === 0) {
+                    isAllOpen = false;
+                    toggleAllText.textContent = '全部展開';
+                }
+            }
+
+            // 頁面滾動進度條 & 返回頂部按鈕
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                progressBar.style.width = scrollPercent + '%';
+
+                if (scrollTop > 300) {
+                    backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // 複製文本至剪貼簿
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('已複製路徑到剪貼簿！');
+            } catch (err) {
+                showToast('複製失敗，請手動複製');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Toast 訊息顯示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('translate-y-12', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-12', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
